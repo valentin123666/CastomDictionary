@@ -7,101 +7,106 @@ using System.Threading.Tasks;
 
 namespace CastomDictionary
 {
-    class DinamicaDictionary <T, R> : IEnumerable<T>,IEnumerable<R>
-    {
-        private void ThrowIfInvalidARY(int index)
+    class DinamicaDictionary <R, T> :IEnumerable<Cell<R,T>>
         {
-            if ((index < 0) || (index >= CountAry))
-            {
-                throw new IndexOutOfRangeException(nameof(index));
-            }
-        }
-        private void ThrowIfInvalidKEY(int index)
-        {
-            if ((index < 0) || (index >= CountKey))
-            {
-                throw new IndexOutOfRangeException(nameof(index));
-            }
-        }
+        private T[] _values;
+        private R[] _keys;
 
-        private T[] _internalArray;
-        private R[] _internalKey;
-
-        public int CountAry { get; private set; }
-        public int CountKey { get; private set; }
+        public int Count { get; private set; }
 
         private const int DefauultCapacity = 100;
+        private const string ErrorArgumentMessage = "Incorrect argument";
+        private const string ErrorKeyJustExistMessage = "Item with this key alreedy exist";
+        private const string ErrorNullMessage = "Argument is null";
 
-        private int CapacityKey;
-        private int CapacitiArrey;
+        private Cell<R, T>[] _cellArray;
 
-        public DinamicaDictionary(int _capacityKey = DefauultCapacity, int _capacitiArrey = DefauultCapacity)
+        private int Capacity;
+        private void ThrowIfInvalid(int index)
         {
-            CapacitiArrey = _capacitiArrey;
-            CapacityKey = _capacityKey;
-
-            _internalArray = new T[_capacitiArrey];
-            _internalKey = new R[_capacityKey];
+            if ((index < 0) || (index >= Count))
+            {
+                throw new IndexOutOfRangeException(nameof(index));
+            }
+        }
+        public DinamicaDictionary(int _capascity = DefauultCapacity)
+        {
+            Capacity = _capascity;
+            _cellArray = new Cell<R, T>[Capacity];      
         }
 
         private void ResizeAry()
         {
-            CapacitiArrey += DefauultCapacity;
-            T[] arrey = new T[CountAry];
-            for ( var i = 0; i <CountAry; i++)
+            Capacity += DefauultCapacity;
+            Cell<R,T>[] arrey = new Cell<R,T>[Count];
+            for ( var i = 0; i <Count; i++)
             {
-                arrey[i] = _internalArray[i];
+                arrey[i] = _cellArray[i];
             }
-            arrey = _internalArray;
+            arrey =_cellArray;
         }
-        private void ResizeKey()
+        public void Add(R Key, T Item)
         {
-            CapacityKey += DefauultCapacity;
-            R[] arrey = new R[CountKey];
-            for (var i= 0; i <CountKey; i++)
-            {
-                arrey[i] = _internalKey[i];
-            }
-            arrey = _internalKey;
+            if (Key == null)
+                throw new ArgumentNullException(ErrorNullMessage, "key");
+
+            if (ContainsKey(Key))
+                throw new ArgumentNullException(ErrorKeyJustExistMessage, "key");
+
+            if (Count >= Capacity)
+                ResizeAry();
+            
+            _cellArray[Count] = new Cell<R, T>(Key, Item); 
+            Count++;
         }
 
-        private void Add(R Key, T Item)
+        public bool ContainsKey(R key)
         {
-            if(_internalArray.Length==CountAry)
+            var flag = false;
+            for ( var i=0; i<Count; i++)
             {
-                ResizeAry();
+                if(key.Equals(_cellArray[i]))
+                {
+                    flag = true;
+                    return flag;
+                }
             }
-            if(_internalKey.Length==CountKey)
-            {
-                ResizeKey();
-            }
-            _internalArray[CountAry] = Item;
-            CountAry++;
-            _internalKey[CountKey] = Key;
-            CountKey++;
+            return flag;
         }
-        public IEnumerator<T> GetEnumerator()
+
+        public void RemoveIntermal (int item)
         {
-            for (int i = 0; i < CountAry; i++)
+            for(var i=item; i<Count;i++)
             {
-                yield return _internalArray[i];
+                _cellArray[i] = _cellArray[i + 1];
             }
+            _cellArray[Count] = default(Cell<R, T>);
+            Count--;
         }
+
+        public int IndexOf (T item)
+        {
+            for(var i =0; i<Count; i++)
+            {
+                if (item.Equals(_cellArray[i]))
+                {
+                    return (i+1);
+                }
+            }
+            return -1;
+        }
+        public IEnumerator<Cell<R,T>> GetEnumerator()
+        {
+            for (int i = 0; i < Count; i++)
+            {
+                yield return _cellArray[i];
+            }
+       }
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
         }
-        public IEnumerator<R> GetEnumeratorKey()
-        {
-            for (int i = 0; i < CountAry; i++)
-            {
-                yield return _internalKey[i];
-            }
-        }
-        IEnumerator IEnumerable.GetEnumeratorKey()
-        {
-            return GetEnumeratorKey();
-        }
+   
 
     }
 }
