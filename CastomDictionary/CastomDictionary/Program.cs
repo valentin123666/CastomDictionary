@@ -15,13 +15,16 @@ namespace CastomDictionary
             _dic.Add(121, "ss");
             _dic.Add(124, "GG");
             _dic.Add(112, "ww");
-
+            _dic.Add(156, "ww");
             _dic.Add(122, "ee");
-            Console.WriteLine(_dic.IndexOf("EE"));
-
-            foreach(var f in _dic)
+            _dic.Remove(112);
+            //  Console.WriteLine(_dic.IndexOf(,"ww"));
+            // _dic.Insert(2, 166, "pidor");
+            Console.WriteLine( "{0} проверка", _dic[127]);
+            foreach(var KeyValue in _dic)
             {
-                Console.WriteLine(f);
+                Console.WriteLine(KeyValue.Key+"-"+KeyValue.Value);
+
             }
             Console.ReadKey();
         }

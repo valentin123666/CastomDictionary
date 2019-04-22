@@ -9,9 +9,7 @@ namespace CastomDictionary
 {
     class DinamicaDictionary <R, T> :IEnumerable<Cell<R,T>>
         {
-        private T[] _values;
-        private R[] _keys;
-
+        public int ElemantKey { get; private set; }
         public int Count { get; private set; }
 
         private const int DefauultCapacity = 100;
@@ -45,38 +43,59 @@ namespace CastomDictionary
             }
             arrey =_cellArray;
         }
-        public void Add(R Key, T Item)
+        public void Add(R key, T values)
         {
-            if (Key == null)
+            if (key == null)
                 throw new ArgumentNullException(ErrorNullMessage, "key");
 
-            if (ContainsKey(Key))
+            if (ContainsKey(key))
                 throw new ArgumentNullException(ErrorKeyJustExistMessage, "key");
 
             if (Count >= Capacity)
                 ResizeAry();
             
-            _cellArray[Count] = new Cell<R, T>(Key, Item); 
-            Count++;
+            _cellArray[Count] = new Cell<R, T>(key, values); 
+           Count++;
         }
-
         public bool ContainsKey(R key)
         {
             var flag = false;
-            for ( var i=0; i<Count; i++)
+                                          
+             for(var i =0; i<Count; i++)
+            { 
+                    if (IsKeysEqual(_cellArray[i].Key,key))
+                    {
+                        flag = true;
+                        return flag;
+                    }
+                }            
+            return flag;
+        }
+        public bool ConteunsValues(T values)
+        {
+            var flag = false;
+            for (var i=0; i<Count; i++)
             {
-                if(key.Equals(_cellArray[i]))
+               
+                if (IsValuesEqual(_cellArray[i].Value, values))
                 {
                     flag = true;
-                    return flag;
-                }
-            }
+                    break;                 
+                } 
+                    }
             return flag;
         }
 
-        public void RemoveIntermal (int item)
+        public void Remove(R key)
         {
-            for(var i=item; i<Count;i++)
+            var item = 0;
+
+            item = KeyOf(key);
+            
+            if (item == -1)
+                throw new ArgumentNullException(ErrorArgumentMessage, "key");
+
+            for(var i=item;i<Count;i++)
             {
                 _cellArray[i] = _cellArray[i + 1];
             }
@@ -84,17 +103,89 @@ namespace CastomDictionary
             Count--;
         }
 
-        public int IndexOf (T item)
+        private void RemoveInternal (int item)
+        {
+            for(var i=item-1; i<Count;i++)
+            {
+                _cellArray[i] = _cellArray[i + 1];
+            }
+            _cellArray[Count] = default(Cell<R, T>);
+            Count--;
+        }
+
+        public int IndexOf (R key, T values)
         {
             for(var i =0; i<Count; i++)
             {
-                if (item.Equals(_cellArray[i]))
+                if (IsValuesEqual(_cellArray[i].Value,values)&&IsKeysEqual(_cellArray[i].Key,key))
                 {
                     return (i+1);
                 }
             }
             return -1;
         }
+        private int KeyOf(R key)
+        {
+            for (var i = 0; i < Count; i++)
+            {
+                if ( IsKeysEqual(_cellArray[i].Key, key))
+                {
+                    return (i);
+                }
+            }
+            return -1;
+        }
+
+        public void Insert(int index , R key, T values)
+        {
+            if (_cellArray.Length == Count)
+            {
+                ResizeAry();
+            }
+
+            for(var i=Count; i>index; i--)
+            {
+                _cellArray[i] = _cellArray[i - 1];
+            }
+            _cellArray[Count] = new Cell<R, T>(key, values);
+            Count++;
+        }
+        public T this[R key]
+        {
+            get
+            {
+                if (ContainsKey(key))
+                {
+                    int index = 0;
+                    index = KeyOf(key);
+                    return _cellArray[index].Value;
+                }
+                else
+                    throw new OutOfMemoryException();
+            }
+            set
+            {
+                if (ContainsKey(key))
+                {
+                    int index = 0;
+                    index = KeyOf(key);
+                    _cellArray[index] = new Cell<R, T>(key, value); 
+                }
+                else
+                    throw new OutOfMemoryException();
+            }          
+        }
+
+        private bool IsKeysEqual(R key1, R key2)
+        {
+            return key1.Equals(key2) && key1.GetHashCode() == key2.GetHashCode();
+        }
+
+        private bool IsValuesEqual (T values1,T values2)
+        {
+            return values1.Equals(values2) && values1.GetHashCode() == values2.GetHashCode();
+        }
+
         public IEnumerator<Cell<R,T>> GetEnumerator()
         {
             for (int i = 0; i < Count; i++)
