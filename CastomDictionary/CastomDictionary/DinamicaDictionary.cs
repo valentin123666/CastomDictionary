@@ -57,6 +57,24 @@ namespace CastomDictionary
             _cellArray[Count] = new Cell<R, T>(key, values); 
            Count++;
         }
+
+        private T r;
+        public bool TryGetValue (R key, out T value)
+        {
+            
+            if (key == null)
+                throw new ArgumentNullException(ErrorNullMessage, "key");
+            if (ContainsKey(key))
+            {
+                int index = KeyOf(key);
+                value = _cellArray[index].Value;
+            }
+            else
+
+                value = r;
+
+            return ContainsKey(key);
+        }
         public bool ContainsKey(R key)
         {
             var flag = false;
@@ -136,20 +154,6 @@ namespace CastomDictionary
             return -1;
         }
 
-        public void Insert(int index , R key, T values)
-        {
-            if (_cellArray.Length == Count)
-            {
-                ResizeAry();
-            }
-
-            for(var i=Count; i>index; i--)
-            {
-                _cellArray[i] = _cellArray[i - 1];
-            }
-            _cellArray[Count] = new Cell<R, T>(key, values);
-            Count++;
-        }
         public T this[R key]
         {
             get
